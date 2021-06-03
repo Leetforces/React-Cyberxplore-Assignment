@@ -1,5 +1,11 @@
-import React,{useState} from 'react';
-import {Link} from 'react-router-dom'
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom'
+
+
+import { toast } from "react-toastify";
+import { login } from "../actions/auth";
+import { useDispatch } from "react-redux";
+
 import { TextField, Grid, InputAdornment, IconButton } from "@material-ui/core";
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -10,7 +16,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
-
+import ForgotPassword from './ForgotPassword';
 const useStyles = makeStyles((theme) => ({
   root: {
     height: '85vh',
@@ -42,35 +48,54 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Login() {
+export default function Login({ history }) {
+  const dispatch = useDispatch();
   const classes = useStyles();
   const [showPassword, setShowPassword] = useState(false);
   const [details, setDetails] = useState({
     email: "",
     password: "",
 
-})
+  })
 
-const handleChange = (e) => {
+  const handleChange = (e) => {
     const value = e.target.value;
     const name = e.target.name;
     setDetails((preValue) => {
-        return {
-            ...preValue,
-            [name]: value,
-        }
+      return {
+        ...preValue,
+        [name]: value,
+      }
     })
-}
-const handleSubmit = async (e) => {
+  }
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-
+      let res = await login({ email: details.email, password: details.password });
+      if (res.data) {
+        console.log("Save User res in REDUX and also in Local Storage ===> ");
+        // save user and token to local storage
+        window.localStorage.setItem("auth", JSON.stringify(res.data));
+        // save user and token to redux
+        dispatch({
+          type: "LOGGED_IN_USER",
+          payload: res.data,
+        });
+        toast.success("Login Success");
+        history.push("/");
+      }
     } catch (err) {
-        console.log(err);
+      console.log(err);
+      if (err.response && err.response.status === 400)
+        toast.error(err.response.data);
     }
-
-}
-
+  };
+  const validEmail = (email) => {
+    if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email)) {
+      return (true);
+    }
+    return (false)
+  }
   return (
     <Grid container component="main" className={classes.root} >
       <CssBaseline />
@@ -94,6 +119,8 @@ const handleSubmit = async (e) => {
               name="email"
               autoComplete="email"
               autoFocus
+              error={details.email === "" || !validEmail(details.email)}
+              helperText={details.email === "" ? 'Empty!' : !validEmail(details.email) ? 'Invalid Email' : ' '}
               onChange={handleChange}
             />
             <TextField
@@ -106,36 +133,42 @@ const handleSubmit = async (e) => {
               type={showPassword ? "text" : "password"}
               id="password"
               autoComplete="current-password"
+              error={details.password === ""}
+              helperText={details.password === "" ? 'Empty!' : ' '}
               onChange={handleChange}
 
               InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={()=> setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <Visibility /> : <VisibilityOff />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
-          
+
             <Button
               type="submit"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
+              error={details.email === ""}
+              disabled={!details.email || !details.password || !validEmail(details.email)}
+
             >
               Sign In
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link href="#" variant="body2">
+                {/* <Link href="#" variant="body2">
                   Forgot password?
-                </Link>
+                </Link> */}
+                <ForgotPassword />
               </Grid>
               <Grid item>
                 <Link to="/register" variant="body2">

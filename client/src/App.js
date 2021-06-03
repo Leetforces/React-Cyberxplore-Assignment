@@ -3,6 +3,7 @@ import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 //to show pop-up information
 import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 //default theme provide to modify it according to need
 import theme from './components/Theme';
@@ -14,7 +15,6 @@ import PrivateRoute from "./components/PrivateRoute";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Profile from "./components/Profile";
-import ResetPassword from "./components/ResetPassword";
 import NewPasswordSetup from "./components/NewPasswordSetup";
 import { ThemeProvider } from "@material-ui/styles";
 import Home from "./components/Home";
@@ -33,7 +33,6 @@ function App() {
           <Route exact path="/register" component={Register} />
 
           {/* route for reset and change password */}
-          <Route exact path="/resetPassword" component={ResetPassword} />
           <Route
             exact
             path="/resetPassword/:token"

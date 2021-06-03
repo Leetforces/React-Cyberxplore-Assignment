@@ -4,6 +4,7 @@ import App from "./App";
 import { createStore } from "redux";
 import { Provider } from "react-redux";
 import { composeWithDevTools } from "redux-devtools-extension";
+
 import rootReducer from "./reducers/index";
 
 // creating redux store

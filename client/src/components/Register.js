@@ -10,6 +10,10 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import ForgotPassword from './ForgotPassword';
+import { register } from '../actions/auth';
+
+import { toast } from "react-toastify";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -43,9 +47,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function Register() {
+export default function Register({ history }) {
     const classes = useStyles();
     const [showPassword, setShowPassword] = useState(false);
+    const [showPassword1, setShowPassword1] = useState(false);
 
     const [details, setDetails] = useState({
         firstName: "",
@@ -70,10 +75,25 @@ export default function Register() {
         e.preventDefault();
         try {
 
+            const res = await register({
+                firstName: details.firstName,
+                lastName: details.lastName,
+                email: details.email,
+                password: details.password,
+            });
+            console.log("Registered User ===> ", res);
+            toast.success("Register Success, Please Login");
+            history.push("/login");
         } catch (err) {
             console.log(err);
+            if (err.response.status === 400) toast.error(err.response.data);
         }
-
+    };
+    const validEmail = (email)=>{
+        if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email)) {
+            return (true);
+        }
+        return (false)
     }
     return (
         <Grid container component="main" className={classes.root}>
@@ -100,6 +120,8 @@ export default function Register() {
                                     label="First Name"
                                     autoFocus
                                     onChange={handleChange}
+                                    error={details.firstName === ""}
+                                    helperText={details.firstName === "" ? 'Empty!' : ' '}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -112,6 +134,8 @@ export default function Register() {
                                     name="lastName"
                                     autoComplete="lname"
                                     onChange={handleChange}
+                                    error={details.lastName === ""}
+                                    helperText={details.lastName === "" ? 'Empty!' : ' '}
                                 />
                             </Grid>
                         </Grid>
@@ -126,6 +150,8 @@ export default function Register() {
                             autoComplete="email"
                             autoFocus
                             onChange={handleChange}
+                            error={details.email === "" || !validEmail(details.email)}
+                            helperText={details.email === "" ? 'Empty!' : !validEmail(details.email) ? 'Invalid Email' : ' '}
                         />
                         <TextField
                             variant="outlined"
@@ -137,6 +163,8 @@ export default function Register() {
                             type={showPassword ? "text" : "password"}
                             id="password"
                             autoComplete="current-password"
+                            error={details.password === ""}
+                            helperText={details.password === "" ? 'Empty!' : ' '}
                             onChange={handleChange}
 
                             InputProps={{
@@ -163,14 +191,16 @@ export default function Register() {
                             id="password"
                             autoComplete="current-password"
                             onChange={handleChange}
+                            error={details.confirmPassword === "" || details.password != details.confirmPassword}
+                            helperText={details.confirmPassword === "" ? 'Empty!' : details.confirmPassword != details.password ? "Password don't match" : " "}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
                                         <IconButton
                                             aria-label="toggle password visibility"
-                                            onClick={() => setShowPassword(!showPassword)}
+                                            onClick={() => setShowPassword1(!showPassword1)}
                                         >
-                                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                                            {showPassword1 ? <Visibility /> : <VisibilityOff />}
                                         </IconButton>
                                     </InputAdornment>
                                 ),
@@ -183,14 +213,16 @@ export default function Register() {
                             variant="contained"
                             color="primary"
                             className={classes.submit}
+                            disabled={!details.email || !details.password || !details.firstName || !details.lastName || !details.confirmPassword || details.password != details.confirmPassword || !validEmail(details.email)}
                         >
                             Sign Up
                       </Button>
                         <Grid container>
                             <Grid item xs>
-                                <Link href="#" variant="body2">
+                                {/* <Link href="#" variant="body2">
                                     Forgot password?
-                                </Link>
+                                </Link> */}
+                                <ForgotPassword />
                             </Grid>
                             <Grid item>
                                 <Link to="/login" variant="body2">

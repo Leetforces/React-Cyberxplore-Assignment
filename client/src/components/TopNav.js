@@ -119,27 +119,47 @@ export default function TopNav() {
 
 
     const [value, setValue] = useState(0);  //to show the active tab or list
+    const [value2, setValue2] = useState(0);  //to show the active tab or list
     const [openDrawer, setOpenDrawer] = useState(0);  // open the drawer on clicking the menu
 
+    //use in logout
+    const history = useHistory();
+    const dispatch = useDispatch();
+    const logout = () => {
+        dispatch({
+            type: "LOGOUT",
+            payload: null,
+        });
+        
 
+        setValue(1);// active link become /login  (for not login user)
+        setValue2(0); //active link become /   for login user
+        window.localStorage.removeItem("auth");
+        history.push("/login");
+    };
 
 
     //set the active tab
     const handleChange = (event, newValue) => {
         setValue(newValue);
     }
+    const handleChange2 = (event, newValue) => {
+        setValue2(newValue);
+    }
 
     // to show initially which tab is active  0-> first tab 1->second tab and so on
     useEffect(() => {
         const path = window.location.pathname;
+
         switch (path) {
-            case "/": setValue(0); break;
-            case "/login": setValue(1);; break;
+            case "/": setValue(0); setValue2(0); break;
+            case "/login": setValue(1); break;
             case "/register": setValue(2); break;
-            case "/profile": setValue(1); break;
+            case "/profile": setValue2(1); break;
             default: break;
         }
     }, []);
+
 
 
     const tabs = (
@@ -149,8 +169,8 @@ export default function TopNav() {
             {auth &&
                 (<>
                     <Tabs
-                        value={value}
-                        onChange={handleChange}
+                        value={value2}
+                        onChange={handleChange2}
                         className={classes.tabContainer}
                         indicatorColor="primary" //same as nav color
                     >
@@ -162,6 +182,7 @@ export default function TopNav() {
                         variant="contained"
                         color="secondary"
                         className={classes.button}
+                        onClick={logout}
                     >
                         Logout
                     </Button>
@@ -212,7 +233,7 @@ export default function TopNav() {
                                 <ListItemText disableTypography>Profile</ListItemText>
                             </ListItem>
 
-                            <ListItem selected={value === 2} className={classes.drawerItemButton} onClick={() => { setOpenDrawer(false); setValue(2) }} divider button component={Link} to="/logout">
+                            <ListItem selected={value === 2} className={classes.drawerItemButton} onClick={() => { setOpenDrawer(false); setValue(2); logout() }} divider button component={Link} >
                                 <ListItemText disableTypography>Logout</ListItemText>
                             </ListItem>
 
@@ -263,17 +284,7 @@ export default function TopNav() {
     )
 
 
-    //use in logout
-    const history = useHistory();
-    const dispatch = useDispatch();
-    const logout = () => {
-        dispatch({
-            type: "LOGOUT",
-            payload: null,
-        });
-        window.localStorage.removeItem("auth");
-        history.push("/login");
-    };
+
 
 
     return (
@@ -282,7 +293,7 @@ export default function TopNav() {
             <ElevationScroll>
                 <AppBar >
                     <Toolbar disableGutters>
-                        <Button component={Link} to="/" className={classes.logoButton} onClick={() => { setValue(0) }} disableRipple>
+                        <Button component={Link} to="/" className={classes.logoButton} onClick={() => { setValue(0); setValue2(0) }} disableRipple>
                             <img src={logo} alt="Logo" className={classes.logo} /> anish
                         </Button>
 
