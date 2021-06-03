@@ -25,7 +25,7 @@ function ElevationScroll(props) {
 const useStyles = makeStyles((theme) => ({
     toolbarMargin: {
         ...theme.mixins.toolbar, //  minHeight:56,
-        marginBottom: "2.3rem",    //add extra bottom margin to see all content (because size of logo increases)
+        marginBottom: "1.5rem",    //add extra bottom margin to see all content (because size of logo increases)
         [theme.breakpoints.down("md")]: {
             minHeight: 35,
             // marginBottom:"0rem",
@@ -110,7 +110,7 @@ export default function TopNav() {
     const { auth } = useSelector((state) => ({ ...state }));
 
     const theme = useTheme(); //theme 
-    const matches = useMediaQuery(theme.breakpoints.down(1150)); // breakpoint to show tab or drawer
+    const matches = useMediaQuery(theme.breakpoints.down(600)); // breakpoint to show tab or drawer
     const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
     const classes = useStyles();  //our own styles defined above
 
@@ -178,8 +178,8 @@ export default function TopNav() {
                     indicatorColor="primary" //same as nav color
                 >
                     <Tab label="Home" component={Link} to="/"> </Tab>
-                    <Tab label="Login" component={Link} to="/login"> </Tab>
-                    <Tab label="Register" component={Link} to="/register"> </Tab>
+                    <Tab label="SignIn" component={Link} to="/login"> </Tab>
+                    <Tab label="SignUp" component={Link} to="/register"> </Tab>
                 </Tabs>
 
 
@@ -287,11 +287,15 @@ export default function TopNav() {
                         </Button>
 
                         {matches ? drawer : tabs}
+
                     </Toolbar>
                 </AppBar>
             </ElevationScroll>
 
             {/* give a minHeight so that content come outside the App Bar */}
+            {matches && (<>
+                <br />
+            </>)}
             <div className={classes.toolbarMargin}></div>
         </>
     )
