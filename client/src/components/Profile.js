@@ -1,26 +1,19 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import clsx from 'clsx';
+import moment from "moment";
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Collapse from '@material-ui/core/Collapse';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
 import { red } from '@material-ui/core/colors';
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import ShareIcon from '@material-ui/icons/Share';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { useSelector } from "react-redux";
 import UpdatePassword from './UpdatePassword';
+import UpdateDetails from './UpdateDetails';
 const useStyles = makeStyles((theme) => ({
     root: {
-        height: '85vh',
-        width: '90vh',
     },
     media: {
         height: 0,
@@ -44,27 +37,25 @@ const useStyles = makeStyles((theme) => ({
 export default function RecipeReviewCard() {
     const { auth } = useSelector((state) => ({ ...state }));
     const classes = useStyles();
-    const [expanded, setExpanded] = React.useState(false);
-
-    const handleExpandClick = () => {
-        setExpanded(!expanded);
-    };
-
+    
     return (
         <Card className={classes.root}>
             <CardHeader
                 avatar={
                     <Avatar aria-label="recipe" className={classes.avatar}>
-                        R
+                        {auth.user.firstName[0]}
           </Avatar>
                 }
                 action={
                     <IconButton aria-label="settings">
-                        <MoreVertIcon />
+                        {/* <MoreVertIcon /> */}
+                        <UpdatePassword />
+                        <UpdateDetails />
+
                     </IconButton>
                 }
-                title={auth.user.email}
-                subheader={auth.user.createdAt}
+                title={auth.user.firstName + " " + auth.user.lastName}
+                subheader={`Joined ${moment(auth.user.createdAt).fromNow()}`}
             />
 
             <CardMedia
@@ -73,13 +64,17 @@ export default function RecipeReviewCard() {
                 title="Paella dish"
             />
             <CardContent>
+                <h1>Email: {auth.user.email}</h1>
+                {auth.user.DOB && (
+                    <>
+                        <h1>DOB: {auth.user.DOB}</h1>
+                    </>
+                )}
 
+                {auth.user.gender && (
+                    <h1>Gender: {auth.user.gender}</h1>
+                )}
 
-                <Typography variant="body2" color="textSecondary" component="p">
-                    This impressive paella is a perfect party dish and a fun meal to cook together with your
-                    guests. Add 1 cup of frozen peas along with the mussels, if you like.
-        </Typography>
-                <UpdatePassword />
             </CardContent>
 
 

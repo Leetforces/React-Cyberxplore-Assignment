@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
-import { Button, TextField,  InputAdornment, IconButton } from '@material-ui/core';
+import { Button, TextField, InputAdornment, IconButton } from '@material-ui/core';
 import { toast } from 'react-toastify';
-import { useHistory } from 'react-router-dom';
 
 
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
+
+import { updatePassword2 } from '../actions/auth'
+import { useSelector } from 'react-redux';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -28,9 +29,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function TransitionsModal() {
-
+    const { auth } = useSelector((state) => ({ ...state }));
     const classes = useStyles();
-    const history = useHistory();
     const [open, setOpen] = React.useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword1, setShowPassword1] = useState(false);
@@ -54,16 +54,33 @@ export default function TransitionsModal() {
             }
         })
     }
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setOpen(false);
+
         try {
+            const password = details.password;
+            const newPassword = details.newPassword;
+            const token = auth.token;
+            const res = await updatePassword2(token, password, newPassword);
 
+            console.log("Response", res);
+            if(res && res.data)
+            toast.success(res.data);
 
-        } catch (err) {
-            console.log(err);
-            if (err.response.status === 400) toast.error(err.response.data);
+        } catch (error) {
+            console.log("Error:", error);
+            if (error && error.response && error.response.status === 400) {
+                toast.error(error.response.data);
+
+            }
+            else {
+                toast.error(error);
+            }
         }
-    };
+
+    }
+
 
     const handleOpen = () => {
         setOpen(true);
@@ -75,9 +92,7 @@ export default function TransitionsModal() {
 
     return (
         <div>
-            <Link variant="body2" onClick={handleOpen}>
-                Update Password
-            </Link>
+            <Button onClick={handleOpen} color="primary" variant="outlined">Update Password</Button>
             <Modal
                 aria-labelledby="transition-modal-title"
                 aria-describedby="transition-modal-description"
@@ -120,7 +135,7 @@ export default function TransitionsModal() {
                                 ),
                             }}
                         />
-                         
+
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -132,8 +147,8 @@ export default function TransitionsModal() {
                             id="password"
                             autoComplete="current-password"
                             onChange={handleChange}
-                            error={details.newPassword === "" }
-                            helperText={details.newPassword === "" ? 'Empty!'  : " "}
+                            error={details.newPassword === ""}
+                            helperText={details.newPassword === "" ? 'Empty!' : " "}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
@@ -182,7 +197,7 @@ export default function TransitionsModal() {
                             color="primary"
                             className={classes.submit}
                             onClick={handleSubmit}
-                            disabled={!details.password || !details.newPassword || !details.confirmNewPassword || details.newPassword!==details.confirmNewPassword}
+                            disabled={!details.password || !details.newPassword || !details.confirmNewPassword || details.newPassword !== details.confirmNewPassword}
                         >
                             Submit
                             </Button>
