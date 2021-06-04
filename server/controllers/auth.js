@@ -17,10 +17,10 @@ const transporter = nodemailer.createTransport(
 export const register = async (req, res) => {
   try {
     console.log(req.body);
-    const { firstName,lastName, email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     // validation
-    if (!firstName ||!lastName) return res.status(400).send("Name is Required");
+    if (!firstName || !lastName) return res.status(400).send("Name is Required");
     if (!email) return res.status(400).send("Email is Required");
     if (!password || password.length < 6)
       return res
@@ -65,7 +65,7 @@ export const login = async (req, res) => {
         expiresIn: "7d",
       });
 
-      
+
       res.json({
         token,
         user: {
@@ -157,5 +157,68 @@ export const updatePassword = async (req, res) => {
   } catch (err) {
     console.log("Error On Updating the Password :", err);
     res.send({ error: err });
+  }
+};
+
+
+export const updatePassword2 = async (req, res) => {
+  try {
+    const newPassword = req.body.newPassword;
+    const password = req.body.password;
+    const user = await User.findById({ _id: req.user._id }).exec();
+
+    // comapre password
+    user.comparePassword(password, (err, match) => {
+      // if password doesn't match or returns an error
+      if (!match || err) return res.status(400).send("Wrong Password");
+      else {
+        user.password = newPassword;
+        user.save();
+        res.send("Password Updated Successfully 👍");
+      }
+
+    });
+  } catch (err) {
+    // if error, send the error message
+    console.log("updatePassword2 ERROR:", err);
+    res.status(400).send("Updating Error");
+  }
+};
+
+
+export const updateallDetails = async (req, res) => {
+  console.log("body:", req.body)
+  const { firstName, lastName, email, DOB, gender, picUrl } = req.body;
+  console.log("Hi")
+  try {
+    const user = await User.findById({ _id: req.user._id }).exec();
+    console.log("Before user", user);
+    console.log("DOB", DOB);
+    if (!user) return res.send("User Not Found. Make sure you are login.");
+
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.email = email;
+    user.DOB = DOB;
+    user.gender = gender;
+    user.picUrl= picUrl;
+    console.log("USER===>", user);
+    await user.save();
+    return res.json({
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        gender: user.gender,
+        createdAt: user.createdAt,
+        DOB: user.DOB,
+        picUrl: user.picUrl,
+      }
+    });
+
+  } catch (err) {
+    // if error, send the error message
+    console.log("updateDetails ERROR:", err);
+    return res.status(400).send("Updating Details Error");
   }
 };
